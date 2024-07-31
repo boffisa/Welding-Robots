@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summary</title>
+    <script>
+        async function fetchData(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const content = doc.body.textContent;
+                const regex = /GROUP 1 MAXIMUM TIP DRESSES:\s*(\d+)/;
+                const match = content.match(regex);
+                if (match) {
+                    return match[1];
+                } else {
+                    throw new Error("Data not found");
+                }
+            } catch (error) {
+                console.error(`Failed to fetch data from ${url}:`, error);
+                return null;
+            }
+        }
+
+        async function loadSummary() {
+            const controllerUrls = [
+                'http://124.1.240.37/editor.htm?type=4&viewmode=1&key=&session=0'
+                // Adicione aqui as URLs de todos os controladores
+            ];
+            const summaryContainer = document.getElementById('summary-container');
+
+            for (const url of controllerUrls) {
+                const data = await fetchData(url);
+                const controllerDiv = document.createElement('div');
+                if (data) {
+                    controllerDiv.innerHTML = `<h3>${url}</h3>
+                                               <p>GROUP 1 MAXIMUM TIP DRESSES: ${data}</p>`;
+                } else {
+                    controllerDiv.innerHTML = `<h3>${url}</h3>
+                                               <p>Error loading data</p>`;
+                }
+                summaryContainer.appendChild(controllerDiv);
+            }
+        }
+
+        window.onload = loadSummary;
+    </script>
+</head>
+<body>
+    <h1>Controllers Summary</h1>
+    <div id="summary-container"></div>
+</body>
+</html>
